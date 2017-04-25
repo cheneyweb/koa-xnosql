@@ -1,0 +1,12 @@
+{
+    "db": {
+        "url": "mongodb://localhost:27017/test"
+    },
+    "log": {
+        "level": "warn"
+    },
+    "server": {
+        "port": 8083,
+        "controllerRoot": "/xnosql"
+    }
+}
