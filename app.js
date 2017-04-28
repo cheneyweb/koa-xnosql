@@ -29,11 +29,11 @@ xnosql.dburl = config.db.url
 app.use(mount(controllerRoot, xnosql.routes()))
 
 // 开始服务监听
-app.listen(port, function() {
-    log.info(`XNosql服务已启动,执行环境:${process.env.NODE_ENV},端口:${port}...`)
-    log.info(`[POST]http://host:${port}/xnosql/MODEL/create`)
-    log.info(`[POST]http://host:${port}/xnosql/MODEL/update`)
-    log.info(`[POST]http://host:${port}/xnosql/MODEL/query`)
-    log.info(`[GET]http://host:${port}/xnosql/MODEL/get/:id`)
-    log.info(`[GET]http://host:${port}/xnosql/MODEL/destroy/:id`)
-})
+app.listen(port)
+
+log.info(`XNosql服务已启动,执行环境:${process.env.NODE_ENV},端口:${port}...`)
+log.info(`[POST]http://host:${port}/xnosql/MODEL/create`)
+log.info(`[POST]http://host:${port}/xnosql/MODEL/update`)
+log.info(`[POST]http://host:${port}/xnosql/MODEL/query`)
+log.info(`[GET]http://host:${port}/xnosql/MODEL/get/:id`)
+log.info(`[GET]http://host:${port}/xnosql/MODEL/destroy/:id`)
