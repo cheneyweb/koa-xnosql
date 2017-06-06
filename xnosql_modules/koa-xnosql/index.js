@@ -3,15 +3,23 @@ const Router = require('koa-router')
 // 初始化路由
 const router = new Router()
 // 持久化相关
+const MongoClient = require('mongodb').MongoClient
 const mongodb = require(__dirname + '/mongodb/mongodb.js')
 const ObjectId = require('mongodb').ObjectID
 // 日志相关
 const log = require('tracer').colorConsole()
 
+// 连接数据库
+router.initConnect = function (dburl) {
+    MongoClient.connect(dburl, function (err, database) {
+        if (err) throw err
+        mongodb.db = database
+    })
+}
 // 配置路由与实体对象的绑定
 // 创建实体对象
-router.post('/:model_name/create', async function(ctx, next) {
-    mongodb.dburl = router.dburl
+router.post('/:model_name/create', async function (ctx, next) {
+    // mongodb.dburl = router.dburl
     let result = await mongodb.insert(ctx.params.model_name, ctx.request.body)
     ctx.body = result.insertedId
     // r.then(result => {
@@ -21,8 +29,8 @@ router.post('/:model_name/create', async function(ctx, next) {
     // })
 })
 // 更新实体对象(根据ID替换)
-router.post('/:model_name/update', async function(ctx, next) {
-    mongodb.dburl = router.dburl
+router.post('/:model_name/update', async function (ctx, next) {
+    // mongodb.dburl = router.dburl
     var query = { '_id': ObjectId(ctx.request.body._id) }
     delete ctx.request.body._id
     let result = await mongodb.update(ctx.params.model_name, query, { $set: ctx.request.body })
@@ -34,8 +42,8 @@ router.post('/:model_name/update', async function(ctx, next) {
     // })
 })
 // 复杂查询实体对象
-router.post('/:model_name/query', async function(ctx, next) {
-    mongodb.dburl = router.dburl
+router.post('/:model_name/query', async function (ctx, next) {
+    // mongodb.dburl = router.dburl
     let result = await mongodb.find(ctx.params.model_name, ctx.request.body)
     ctx.body = result
     // r.then(result => {
@@ -45,8 +53,8 @@ router.post('/:model_name/query', async function(ctx, next) {
     // })
 })
 // 销毁实体对象(删除时需要登录认证权限)
-router.get('/:model_name/destroy/:id', async function(ctx, next) {
-    mongodb.dburl = router.dburl
+router.get('/:model_name/destroy/:id', async function (ctx, next) {
+    // mongodb.dburl = router.dburl
     var query = { '_id': ObjectId(ctx.params.id) }
     let result = await mongodb.remove(ctx.params.model_name, query)
     ctx.body = result.result.n.toString()
@@ -57,8 +65,8 @@ router.get('/:model_name/destroy/:id', async function(ctx, next) {
     // })
 })
 // 获取实体对象
-router.get('/:model_name/get/:id', async function(ctx, next) {
-    mongodb.dburl = router.dburl
+router.get('/:model_name/get/:id', async function (ctx, next) {
+    // mongodb.dburl = router.dburl
     var query = { '_id': ObjectId(ctx.params.id) }
     let result = await mongodb.findOne(ctx.params.model_name, query)
     ctx.body = result

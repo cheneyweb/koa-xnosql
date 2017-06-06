@@ -25,7 +25,8 @@ app.use(bodyParser())
  * [GET]http://host:port/xnosql/model/destroy/:id
  */
 // 引入koa-xbatis中间件
-xnosql.dburl = config.db.url
+// xnosql.dburl = config.db.url
+xnosql.initConnect(config.db.url)
 app.use(mount(controllerRoot, xnosql.routes()))
 
 // 开始服务监听
