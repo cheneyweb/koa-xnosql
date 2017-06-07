@@ -14,6 +14,8 @@ router.initConnect = function (dburl) {
     MongoClient.connect(dburl, function (err, database) {
         if (err) throw err
         mongodb.db = database
+        router.mongodb = mongodb
+        global.mongodb = mongodb
     })
 }
 // 配置路由与实体对象的绑定
