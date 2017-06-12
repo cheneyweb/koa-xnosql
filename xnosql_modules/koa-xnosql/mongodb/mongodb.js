@@ -57,6 +57,17 @@ var mongodb = {
             log.error(e.message)
         }
         return result
+    },
+    findAndSort: async function (collectionName, query, sort) {
+        let result
+        try {
+            // db = await MongoClient.connect(this.dburl)
+            result = await this.db.collection(collectionName).find(query).sort(sort).toArray()
+            // db.close()
+        } catch (e) {
+            log.error(e.message)
+        }
+        return result
     }
 }
 
