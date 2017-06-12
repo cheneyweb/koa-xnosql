@@ -1,11 +1,10 @@
-const MongoClient = require('mongodb').MongoClient
 const log = require('tracer').colorConsole()
 
 var mongodb = {
     // dburl: '',
     db: null,
     insert: async function (collectionName, obj) {
-        // let db, result
+        let result
         try {
             // db = await MongoClient.connect(this.dburl)
             result = await this.db.collection(collectionName).insertOne(obj)
@@ -16,7 +15,7 @@ var mongodb = {
         return result
     },
     update: async function (collectionName, query, obj) {
-        // let db, result
+        let result
         try {
             // db = await MongoClient.connect(this.dburl)
             result = await this.db.collection(collectionName).updateOne(query, obj)
@@ -27,7 +26,7 @@ var mongodb = {
         return result
     },
     find: async function (collectionName, query) {
-        // let db, result
+        let result
         try {
             // db = await MongoClient.connect(this.dburl)
             result = await this.db.collection(collectionName).find(query).toArray()
@@ -38,7 +37,7 @@ var mongodb = {
         return result
     },
     remove: async function (collectionName, query) {
-        // let db, result
+        let result
         try {
             // db = await MongoClient.connect(this.dburl)
             result = await this.db.collection(collectionName).remove(query)
@@ -49,7 +48,7 @@ var mongodb = {
         return result
     },
     findOne: async function (collectionName, query) {
-        // let db, result
+        let result
         try {
             // db = await MongoClient.connect(this.dburl)
             result = await this.db.collection(collectionName).findOne(query)
