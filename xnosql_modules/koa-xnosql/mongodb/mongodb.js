@@ -1,73 +1,34 @@
-const log = require('tracer').colorConsole()
-
 var mongodb = {
-    // dburl: '',
     db: null,
     insert: async function (collectionName, obj) {
-        let result
-        try {
-            // db = await MongoClient.connect(this.dburl)
-            result = await this.db.collection(collectionName).insertOne(obj)
-            // db.close()
-        } catch (e) {
-            log.error(e.message)
-        }
-        return result
+        // db = await MongoClient.connect(this.dburl)
+        return await this.db.collection(collectionName).insertOne(obj)
+        // db.close()
     },
     update: async function (collectionName, query, obj) {
-        let result
-        try {
-            // db = await MongoClient.connect(this.dburl)
-            result = await this.db.collection(collectionName).updateOne(query, obj)
-            // db.close()
-        } catch (e) {
-            log.error(e.message)
-        }
-        return result
+        // db = await MongoClient.connect(this.dburl)
+        return await this.db.collection(collectionName).updateOne(query, obj)
+        // db.close()
     },
     find: async function (collectionName, query) {
-        let result
-        try {
-            // db = await MongoClient.connect(this.dburl)
-            result = await this.db.collection(collectionName).find(query).toArray()
-            // db.close()
-        } catch (e) {
-            log.error(e.message)
-        }
-        return result
+        // db = await MongoClient.connect(this.dburl)
+        return await this.db.collection(collectionName).find(query).toArray()
+        // db.close()
     },
     remove: async function (collectionName, query) {
-        let result
-        try {
-            // db = await MongoClient.connect(this.dburl)
-            result = await this.db.collection(collectionName).remove(query)
-            // db.close()
-        } catch (e) {
-            log.error(e.message)
-        }
-        return result
+        // db = await MongoClient.connect(this.dburl)
+        return await this.db.collection(collectionName).remove(query)
+        // db.close()
     },
     findOne: async function (collectionName, query) {
-        let result
-        try {
-            // db = await MongoClient.connect(this.dburl)
-            result = await this.db.collection(collectionName).findOne(query)
-            // db.close()
-        } catch (e) {
-            log.error(e.message)
-        }
-        return result
+        // db = await MongoClient.connect(this.dburl)
+        return await this.db.collection(collectionName).findOne(query)
+        // db.close()
     },
     findAndSort: async function (collectionName, query, sort) {
-        let result
-        try {
-            // db = await MongoClient.connect(this.dburl)
-            result = await this.db.collection(collectionName).find(query).sort(sort).toArray()
-            // db.close()
-        } catch (e) {
-            log.error(e.message)
-        }
-        return result
+        // db = await MongoClient.connect(this.dburl)
+        return await this.db.collection(collectionName).find(query).sort(sort).toArray()
+        // db.close()
     }
 }
 

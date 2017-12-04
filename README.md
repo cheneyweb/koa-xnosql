@@ -8,13 +8,13 @@ NoSql服务应用，基于koa-xnosql中间件，快速构建轻量小巧灵活�
 	1,config/default.js中设置数据库连接，执行npm install
 	2,node app.js(启动)
 
-单独使用x-nosql中间件(任意express应用均可集成)
+单独使用x-nosql中间件(任意koa应用均可集成)
 >
 	1, npm install koa-xnosql --save
 
 	2, let xnosql = require('koa-xnosql')
 
-	3, xnosql.dburl = 'mongodb://localhost:27017/test'
+	3, xnosql.initConnect(config.db.url)
 
 	4, app.use(mount(controllerRoot, xnosql.routes()))
 
@@ -36,8 +36,8 @@ RESTful规则
 	[POST]http://host:port/xnosql/MODEL/create
 	[POST]http://host:port/xnosql/MODEL/update
 	[POST]http://host:port/xnosql/MODEL/query
-	[GET]http://host:port/xnosql/MODEL/get/:id
-	[GET]http://host:port/xnosql/MODEL/destroy/:id
+	[GET ]http://host:port/xnosql/MODEL/get/:id
+	[GET ]http://host:port/xnosql/MODEL/destroy/:id
 
 例子
 >
@@ -54,15 +54,13 @@ RESTful规则
 
 框架整合（开源力量）
 >
-    "body-parser": "^1.17.1",
-    "config": "^1.25.1",
-    "koa": "^2.2.0",
+    "config": "^1.28.1",
+    "koa": "^2.4.1",
     "koa-bodyparser": "^4.2.0",
     "koa-mount": "^3.0.0",
-    "koa-router": "^7.0.1",
-    "moment": "^2.17.1",
-    "mongodb": "^2.2.25",
-    "tracer": "^0.8.7"
+    "koa-router": "^7.3.0",
+    "mongodb": "^2.2.33",
+    "tracer": "^0.8.11"
 
 帮助联系
 >
@@ -74,3 +72,4 @@ RESTful规则
 >
 	2017.04.29:无后端理念确认，1.0版本推出
 	2017.06.06:统一使用连接池，1.1版本推出
+	2017.12.04:精简更新所有依赖包
