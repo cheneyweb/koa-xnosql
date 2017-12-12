@@ -52,16 +52,6 @@ RESTful规则
 	[GET]http://host:port/xnosql/user_model/get/1
 	[GET]http://host:port/xnosql/user_model/destroy/1
 
-框架整合（开源力量）
->
-    "config": "^1.28.1",
-    "koa": "^2.4.1",
-    "koa-bodyparser": "^4.2.0",
-    "koa-mount": "^3.0.0",
-    "koa-router": "^7.3.0",
-    "mongodb": "^2.2.33",
-    "tracer": "^0.8.11"
-
 帮助联系
 >
 	作者:cheneyxu，chenxingling
@@ -73,3 +63,4 @@ RESTful规则
 	2017.04.29:无后端理念确认，1.0版本推出
 	2017.06.06:统一使用连接池，1.1版本推出
 	2017.12.04:精简更新所有依赖包
+	2017.12.12:更新koa-body

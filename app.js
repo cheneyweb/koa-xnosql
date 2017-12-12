@@ -4,7 +4,7 @@ const port = config.server.port
 const controllerRoot = config.server.controllerRoot
 // 应用服务
 const Koa = require('koa')
-const bodyParser = require('koa-bodyparser')
+const koaBody = require('koa-body')
 const mount = require('koa-mount')
 const xnosql = require(__dirname + '/xnosql_modules/koa-xnosql/index.js')
 
@@ -14,7 +14,7 @@ const log = require('tracer').colorConsole({ level: config.log.level })
 // 初始化应用服务器
 const app = new Koa()
 // 入参JSON解析
-app.use(bodyParser())
+app.use(koaBody())
 
 // 引入koa-xnosql中间件
 xnosql.initConnect(config.db.url)
