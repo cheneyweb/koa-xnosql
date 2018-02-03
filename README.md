@@ -14,9 +14,7 @@ NoSql服务应用，基于koa-xnosql中间件，快速构建轻量小巧灵活�
 
 	2, let xnosql = require('koa-xnosql')
 
-	3, xnosql.initConnect(config.db.url)
-
-	4, app.use(mount(controllerRoot, xnosql.routes()))
+	3, xnosql.init(app, config.server)
 
 框架目录结构
 >
@@ -64,3 +62,4 @@ RESTful规则
 	2017.06.06:统一使用连接池，1.1版本推出
 	2017.12.04:精简更新所有依赖包
 	2017.12.12:更新koa-body
+	2018.02.04:更新所有依赖，增加支持多层中间层业务流转，全新1.0版本发布

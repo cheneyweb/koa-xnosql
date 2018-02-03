@@ -1,13 +1,10 @@
 // 系统配置
 const config = require('config')
 const port = config.server.port
-const controllerRoot = config.server.controllerRoot
 // 应用服务
 const Koa = require('koa')
 const koaBody = require('koa-body')
-const mount = require('koa-mount')
 const xnosql = require(__dirname + '/xnosql_modules/koa-xnosql/index.js')
-
 // 日志相关
 const log = require('tracer').colorConsole({ level: config.log.level })
 
@@ -16,9 +13,8 @@ const app = new Koa()
 // 入参JSON解析
 app.use(koaBody())
 
-// 引入koa-xnosql中间件
-xnosql.initConnect(config.db.url)
-app.use(mount(controllerRoot, xnosql.routes()))
+// 加载koa-xnosql中间件
+xnosql.init(app, config.server)
 
 // 开始服务监听
 app.listen(port)

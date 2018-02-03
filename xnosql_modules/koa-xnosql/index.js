@@ -1,7 +1,10 @@
 // 路由相关
 const Router = require('koa-router')
+const mount = require('koa-mount')
 // 初始化路由
 const router = new Router()
+// 控制器加载
+const fs = require('fs')
 // 持久化相关
 const MongoClient = require('mongodb').MongoClient
 const mongodb = require(__dirname + '/mongodb/mongodb.js')
@@ -9,21 +12,42 @@ const ObjectId = require('mongodb').ObjectID
 // 日志相关
 const log = require('tracer').colorConsole()
 
-// 连接数据库
-router.initConnect = function (dburl) {
-    MongoClient.connect(dburl, function (err, database) {
+/**
+ * 初始化数据库连接，加载所有中间件路由
+ */
+router.init = function (app, options) {
+    MongoClient.connect(options.mongodbUrl, function (err, database) {
         if (err) throw err
-        mongodb.db = database
+        mongodb.db = database.db(options.mongodbUrl.substring(options.mongodbUrl.lastIndexOf('/') + 1, options.mongodbUrl.length))
         router.mongodb = mongodb
         global.mongodb = mongodb
     })
+    const middlewareDir = `${process.cwd()}${options.middlewareDir || '/src/middleware/'}`
+    const controllerRoot = options.xnosqlRoot || '/xnosql'
+    fs.readdirSync(middlewareDir).forEach(function (filename) {
+        if (filename.startsWith('pre')) {
+            let router = require(`${middlewareDir}/${filename}`)
+            app.use(mount(controllerRoot, router.routes()))
+        }
+    })
+    log.info('xnosql所有前置路由已加载')
+    app.use(mount(controllerRoot, router.routes()))
+    log.info('xnosql所有执行路由已加载')
+    fs.readdirSync(middlewareDir).forEach(function (filename) {
+        if (filename.startsWith('after')) {
+            let router = require(`${middlewareDir}/${filename}`)
+            app.use(mount(controllerRoot, router.routes()))
+        }
+    })
+    log.info('xnosql所有后置路由已加载')
 }
 // 配置路由与实体对象的绑定
 // 创建实体对象
 router.post('/:model_name/create', async function (ctx, next) {
     try {
-        const result = await mongodb.insert(ctx.params.model_name, ctx.request.body)
+        let result = await mongodb.insert(ctx.params.model_name, ctx.request.body)
         ctx.body = okRes(result.insertedId)
+        return next()
     } catch (error) {
         log.error(error)
         ctx.body = errRes('路由服务异常')
@@ -34,8 +58,9 @@ router.post('/:model_name/update', async function (ctx, next) {
     try {
         const query = { '_id': ObjectId(ctx.request.body._id) }
         delete ctx.request.body._id
-        const result = await mongodb.update(ctx.params.model_name, query, { $set: ctx.request.body })
+        let result = await mongodb.update(ctx.params.model_name, query, { $set: ctx.request.body })
         ctx.body = okRes(result.result.nModified.toString())
+        return next()
     } catch (error) {
         log.error(error)
         ctx.body = errRes('路由服务异常')
@@ -44,8 +69,9 @@ router.post('/:model_name/update', async function (ctx, next) {
 // 复杂查询实体对象
 router.post('/:model_name/query', async function (ctx, next) {
     try {
-        const result = await mongodb.find(ctx.params.model_name, ctx.request.body)
+        let result = await mongodb.find(ctx.params.model_name, ctx.request.body)
         ctx.body = okRes(result)
+        return next()
     } catch (error) {
         log.error(error)
         ctx.body = errRes('路由服务异常')
@@ -55,8 +81,9 @@ router.post('/:model_name/query', async function (ctx, next) {
 router.get('/:model_name/destroy/:id', async function (ctx, next) {
     try {
         const query = { '_id': ObjectId(ctx.params.id) }
-        const result = await mongodb.remove(ctx.params.model_name, query)
+        let result = await mongodb.remove(ctx.params.model_name, query)
         ctx.body = okRes(result.result.n.toString())
+        return next()
     } catch (error) {
         log.error(error)
         ctx.body = errRes('路由服务异常')
@@ -66,8 +93,9 @@ router.get('/:model_name/destroy/:id', async function (ctx, next) {
 router.get('/:model_name/get/:id', async function (ctx, next) {
     try {
         const query = { '_id': ObjectId(ctx.params.id) }
-        const result = await mongodb.findOne(ctx.params.model_name, query)
+        let result = await mongodb.findOne(ctx.params.model_name, query)
         ctx.body = okRes(result)
+        return next()
     } catch (error) {
         log.error(error)
         ctx.body = errRes('路由服务异常')

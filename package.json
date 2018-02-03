@@ -1,18 +1,18 @@
 {
   "name": "koa-xnosql",
   "version": "1.0.0",
-  "description": "",
+  "description": "koa-xnosql演示",
   "main": "app.js",
   "scripts": {
     "start": "node app.js"
   },
   "dependencies": {
-    "config": "^1.28.1",
+    "config": "^1.29.2",
     "koa": "^2.4.1",
     "koa-body": "^2.5.0",
     "koa-mount": "^3.0.0",
-    "koa-router": "^7.3.0",
-    "mongodb": "^2.2.33",
+    "koa-router": "^7.4.0",
+    "mongodb": "^3.0.2",
     "tracer": "^0.8.11"
   },
   "author": "cheneyxu",
