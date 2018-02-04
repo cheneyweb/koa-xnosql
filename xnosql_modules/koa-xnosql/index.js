@@ -19,8 +19,8 @@ router.init = function (app, options) {
     MongoClient.connect(options.mongodbUrl, function (err, database) {
         if (err) throw err
         mongodb.db = database.db(options.mongodbUrl.substring(options.mongodbUrl.lastIndexOf('/') + 1, options.mongodbUrl.length))
-        router.mongodb = mongodb.db
-        global.mongodb = mongodb.db
+        router.mongodb = mongodb
+        global.mongodb = mongodb
     })
     const middlewareDir = `${process.cwd()}${options.middlewareDir || '/src/middleware/'}`
     const controllerRoot = options.xnosqlRoot || '/xnosql'
