@@ -34,6 +34,7 @@ RESTful规则
 	[POST]http://host:port/xnosql/MODEL/create
 	[POST]http://host:port/xnosql/MODEL/update
 	[POST]http://host:port/xnosql/MODEL/query
+	[POST]http://host:port/xnosql/MODEL/page
 	[GET ]http://host:port/xnosql/MODEL/get/:id
 	[GET ]http://host:port/xnosql/MODEL/destroy/:id
 
@@ -47,6 +48,8 @@ RESTful规则
 		post body:{id:1,"username":"cheney","password":"456"}
 	[POST]http://host:port/xnosql/user_model/query
 		post body:{"username":"cheney","password":"123"}
+	[POST]http://host:port/xnosql/user_model/page
+		post body:{"username":"cheney","password":"123","sort":{"datetimeCreate":-1},"options":{"limit":10,"skip":5}}
 	[GET]http://host:port/xnosql/user_model/get/1
 	[GET]http://host:port/xnosql/user_model/destroy/1
 
@@ -63,3 +66,4 @@ RESTful规则
 	2017.12.04:精简更新所有依赖包
 	2017.12.12:更新koa-body
 	2018.02.04:更新所有依赖，增加支持多层中间层业务流转，全新1.0版本发布
+	2018.02.09:增加自动分页查询路由

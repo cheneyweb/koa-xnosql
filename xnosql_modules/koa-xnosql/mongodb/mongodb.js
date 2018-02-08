@@ -25,9 +25,14 @@ var mongodb = {
         return await this.db.collection(collectionName).findOne(query)
         // db.close()
     },
-    findAndSort: async function (collectionName, query, sort) {
+    findAndSort: async function (collectionName, query, sort, options) {
         // db = await MongoClient.connect(this.dburl)
-        return await this.db.collection(collectionName).find(query).sort(sort).toArray()
+        if (options && options.limit) {
+            options.skip = options.skip || 0
+            return await this.db.collection(collectionName).find(query).sort(sort).limit(options.limit).skip(options.skip).toArray()
+        } else {
+            return await this.db.collection(collectionName).find(query).sort(sort).toArray()
+        }
         // db.close()
     }
 }

@@ -77,6 +77,21 @@ router.post('/:model_name/query', async function (ctx, next) {
         ctx.body = errRes('路由服务异常')
     }
 })
+// 复杂分页查询实体对象
+router.post('/:model_name/page', async function (ctx, next) {
+    try {
+        let options = ctx.request.body.options
+        let sort = ctx.request.body.sort
+        delete ctx.request.body.options
+        delete ctx.request.body.sort
+        let result = await mongodb.findAndSort(ctx.params.model_name, ctx.request.body, sort, options)
+        ctx.body = okRes(result)
+        return next()
+    } catch (error) {
+        log.error(error)
+        ctx.body = errRes('路由服务异常')
+    }
+})
 // 销毁实体对象(删除时需要登录认证权限)
 router.get('/:model_name/destroy/:id', async function (ctx, next) {
     try {
