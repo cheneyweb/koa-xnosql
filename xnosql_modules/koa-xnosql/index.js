@@ -16,7 +16,7 @@ const log = require('tracer').colorConsole()
  * 初始化数据库连接，加载所有中间件路由
  */
 router.init = function (app, options) {
-    MongoClient.connect(options.mongodbUrl, function (err, database) {
+    MongoClient.connect(options.mongodbUrl, { useNewUrlParser: true }, function (err, database) {
         if (err) throw err
         mongodb.db = database.db(options.mongodbUrl.substring(options.mongodbUrl.lastIndexOf('/') + 1, options.mongodbUrl.length))
         router.mongodb = mongodb
