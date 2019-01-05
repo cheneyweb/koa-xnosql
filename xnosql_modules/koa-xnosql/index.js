@@ -43,6 +43,16 @@ router.init = function (app, options) {
 }
 // 配置路由与实体对象的绑定
 // 创建实体对象
+router.post('/:model_name/insert', async function (ctx, next) {
+    try {
+        let result = await mongodb.insert(ctx.params.model_name, ctx.request.body)
+        ctx.body = okRes(result.insertedId)
+        return next()
+    } catch (error) {
+        log.error(error)
+        ctx.body = errRes('路由服务异常')
+    }
+})
 router.post('/:model_name/create', async function (ctx, next) {
     try {
         let result = await mongodb.insert(ctx.params.model_name, ctx.request.body)
@@ -93,6 +103,17 @@ router.post('/:model_name/page', async function (ctx, next) {
     }
 })
 // 销毁实体对象(删除时需要登录认证权限)
+router.get('/:model_name/delete/:id', async function (ctx, next) {
+    try {
+        const query = { '_id': ObjectId(ctx.params.id) }
+        let result = await mongodb.remove(ctx.params.model_name, query)
+        ctx.body = okRes(result.result.n.toString())
+        return next()
+    } catch (error) {
+        log.error(error)
+        ctx.body = errRes('路由服务异常')
+    }
+})
 router.get('/:model_name/destroy/:id', async function (ctx, next) {
     try {
         const query = { '_id': ObjectId(ctx.params.id) }
