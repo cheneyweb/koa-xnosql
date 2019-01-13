@@ -70,3 +70,4 @@ RESTful规则
 	2018.10.14:更新所有依赖
 	2018.10.29:更新所有依赖
 	2019.01.05:更新所有依赖，增加路由/insert和/delete
+	2019.01.13:增加mongodb的封装方法对于insertOne和insertMany的判断

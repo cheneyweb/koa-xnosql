@@ -1,19 +1,23 @@
 var mongodb = {
     db: null,
     insert: async function (collectionName, obj) {
-        return await this.db.collection(collectionName).insertOne(obj)
+        if (obj.constructor == Array) {
+            return await this.db.collection(collectionName).insertMany(obj)
+        } else {
+            return await this.db.collection(collectionName).insertOne(obj)
+        }
         // db.close()
     },
     update: async function (collectionName, query, obj) {
         return await this.db.collection(collectionName).updateOne(query, obj)
         // db.close()
     },
-    find: async function (collectionName, query) {
-        return await this.db.collection(collectionName).find(query).toArray()
-        // db.close()
-    },
     remove: async function (collectionName, query) {
         return await this.db.collection(collectionName).remove(query)
+        // db.close()
+    },
+    find: async function (collectionName, query) {
+        return await this.db.collection(collectionName).find(query).toArray()
         // db.close()
     },
     findOne: async function (collectionName, query) {
