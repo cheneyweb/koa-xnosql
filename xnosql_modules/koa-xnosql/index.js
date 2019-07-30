@@ -16,7 +16,7 @@ const log = require('tracer').colorConsole()
  * 初始化数据库连接，加载所有中间件路由
  */
 router.init = function (app, options) {
-    MongoClient.connect(options.mongodbUrl, { useNewUrlParser: true }, function (err, database) {
+    MongoClient.connect(options.mongodbUrl, { useNewUrlParser: true }, (err, database) => {
         if (err) throw err
         mongodb.db = database.db(options.mongodbUrl.substring(options.mongodbUrl.lastIndexOf('/') + 1, options.mongodbUrl.length))
         router.mongodb = mongodb
@@ -24,16 +24,16 @@ router.init = function (app, options) {
     })
     const middlewareDir = `${process.cwd()}${options.middlewareDir || '/src/middleware/'}`
     const controllerRoot = options.xnosqlRoot || '/xnosql'
-    fs.readdirSync(middlewareDir).forEach(function (filename) {
+    fs.readdirSync(middlewareDir).forEach((filename) => {
         if (filename.startsWith('pre')) {
             let router = require(`${middlewareDir}/${filename}`)
             app.use(mount(controllerRoot, router.routes()))
         }
     })
-    log.info('xnosql所有前置路由已加载')
+    // log.info('xnosql所有前置路由已加载')
     app.use(mount(controllerRoot, router.routes()))
-    log.info('xnosql所有执行路由已加载')
-    fs.readdirSync(middlewareDir).forEach(function (filename) {
+    // log.info('xnosql所有执行路由已加载')
+    fs.readdirSync(middlewareDir).forEach((filename) => {
         if (filename.startsWith('after')) {
             let router = require(`${middlewareDir}/${filename}`)
             app.use(mount(controllerRoot, router.routes()))
@@ -43,7 +43,7 @@ router.init = function (app, options) {
 }
 // 配置路由与实体对象的绑定
 // 创建实体对象
-router.post('/:model_name/insert', async function (ctx, next) {
+router.post('/:model_name/create', async (ctx, next) => {
     try {
         let result = await mongodb.insert(ctx.params.model_name, ctx.request.body)
         ctx.body = okRes(result.insertedId)
@@ -53,10 +53,12 @@ router.post('/:model_name/insert', async function (ctx, next) {
         ctx.body = errRes('路由服务异常')
     }
 })
-router.post('/:model_name/create', async function (ctx, next) {
+// 删除实体对象
+router.post('/:model_name/delete/:id', async (ctx, next) => {
     try {
-        let result = await mongodb.insert(ctx.params.model_name, ctx.request.body)
-        ctx.body = okRes(result.insertedId)
+        const query = ctx.request.body.id ? { 'id': ctx.params.id } : { '_id': ObjectId(ctx.params.id) }
+        let result = await mongodb.remove(ctx.params.model_name, query)
+        ctx.body = okRes(result.result.n.toString())
         return next()
     } catch (error) {
         log.error(error)
@@ -64,9 +66,9 @@ router.post('/:model_name/create', async function (ctx, next) {
     }
 })
 // 更新实体对象(根据ID替换)
-router.post('/:model_name/update', async function (ctx, next) {
+router.post('/:model_name/update', async (ctx, next) => {
     try {
-        const query = { '_id': ObjectId(ctx.request.body._id) }
+        const query = ctx.request.body.id ? { 'id': ctx.request.body.id } : { '_id': ObjectId(ctx.request.body._id) }
         delete ctx.request.body._id
         let result = await mongodb.update(ctx.params.model_name, query, { $set: ctx.request.body })
         ctx.body = okRes(result.result.nModified.toString())
@@ -77,7 +79,7 @@ router.post('/:model_name/update', async function (ctx, next) {
     }
 })
 // 复杂查询实体对象
-router.post('/:model_name/query', async function (ctx, next) {
+router.post('/:model_name/query', async (ctx, next) => {
     try {
         let result = await mongodb.find(ctx.params.model_name, ctx.request.body)
         ctx.body = okRes(result)
@@ -88,7 +90,7 @@ router.post('/:model_name/query', async function (ctx, next) {
     }
 })
 // 复杂分页查询实体对象
-router.post('/:model_name/page', async function (ctx, next) {
+router.post('/:model_name/page', async (ctx, next) => {
     try {
         let options = ctx.request.body.options
         let sort = ctx.request.body.sort
@@ -102,35 +104,72 @@ router.post('/:model_name/page', async function (ctx, next) {
         ctx.body = errRes('路由服务异常')
     }
 })
-// 销毁实体对象(删除时需要登录认证权限)
-router.get('/:model_name/delete/:id', async function (ctx, next) {
+// 复杂GET查询实体对象
+router.get('/:model_name/query', async (ctx, next) => {
     try {
-        const query = { '_id': ObjectId(ctx.params.id) }
-        let result = await mongodb.remove(ctx.params.model_name, query)
-        ctx.body = okRes(result.result.n.toString())
+        let result = await mongodb.find(ctx.params.model_name, ctx.params)
+        ctx.body = okRes(result)
         return next()
     } catch (error) {
         log.error(error)
         ctx.body = errRes('路由服务异常')
     }
 })
-router.get('/:model_name/destroy/:id', async function (ctx, next) {
+// 复杂GET分页查询实体对象
+router.get('/:model_name/page', async (ctx, next) => {
     try {
-        const query = { '_id': ObjectId(ctx.params.id) }
-        let result = await mongodb.remove(ctx.params.model_name, query)
-        ctx.body = okRes(result.result.n.toString())
+        let options = ctx.params.options
+        let sort = ctx.params.sort
+        delete ctx.params.options
+        delete ctx.params.sort
+        let result = await mongodb.findAndSort(ctx.params.model_name, ctx.params, sort, options)
+        ctx.body = okRes(result)
         return next()
     } catch (error) {
         log.error(error)
         ctx.body = errRes('路由服务异常')
     }
 })
-// 获取实体对象
-router.get('/:model_name/get/:id', async function (ctx, next) {
+// 简单GET获取实体对象
+router.get('/:model_name/get/:id', async (ctx, next) => {
     try {
-        const query = { '_id': ObjectId(ctx.params.id) }
+        const query = ctx.request.body.id ? { 'id': ctx.params.id } : { '_id': ObjectId(ctx.params.id) }
         let result = await mongodb.findOne(ctx.params.model_name, query)
         ctx.body = okRes(result)
+        return next()
+    } catch (error) {
+        log.error(error)
+        ctx.body = errRes('路由服务异常')
+    }
+})
+
+// 旧版本兼容
+router.post('/:model_name/insert', async (ctx, next) => {
+    try {
+        let result = await mongodb.insert(ctx.params.model_name, ctx.request.body)
+        ctx.body = okRes(result.insertedId)
+        return next()
+    } catch (error) {
+        log.error(error)
+        ctx.body = errRes('路由服务异常')
+    }
+})
+router.get('/:model_name/delete/:id', async (ctx, next) => {
+    try {
+        const query = { '_id': ObjectId(ctx.params.id) }
+        let result = await mongodb.remove(ctx.params.model_name, query)
+        ctx.body = okRes(result.result.n.toString())
+        return next()
+    } catch (error) {
+        log.error(error)
+        ctx.body = errRes('路由服务异常')
+    }
+})
+router.get('/:model_name/destroy/:id', async (ctx, next) => {
+    try {
+        const query = { '_id': ObjectId(ctx.params.id) }
+        let result = await mongodb.remove(ctx.params.model_name, query)
+        ctx.body = okRes(result.result.n.toString())
         return next()
     } catch (error) {
         log.error(error)
