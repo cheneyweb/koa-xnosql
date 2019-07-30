@@ -1,35 +1,38 @@
 var mongodb = {
     db: null,
-    insert: async function (collectionName, obj) {
+    insert: function (collectionName, obj) {
         if (obj.constructor == Array) {
-            return await this.db.collection(collectionName).insertMany(obj)
+            return this.db.collection(collectionName).insertMany(obj)
         } else {
-            return await this.db.collection(collectionName).insertOne(obj)
+            return this.db.collection(collectionName).insertOne(obj)
         }
         // db.close()
     },
-    update: async function (collectionName, query, obj) {
-        return await this.db.collection(collectionName).updateOne(query, obj)
+    update: function (collectionName, query, obj) {
+        return this.db.collection(collectionName).updateOne(query, obj)
         // db.close()
     },
-    remove: async function (collectionName, query) {
-        return await this.db.collection(collectionName).remove(query)
+    remove: function (collectionName, query) {
+        return this.db.collection(collectionName).remove(query)
         // db.close()
     },
-    find: async function (collectionName, query) {
-        return await this.db.collection(collectionName).find(query).toArray()
+    deleteOne: function (collectionName, query) {
+        return this.db.collection(collectionName).deleteOne(query)
+    },
+    find: function (collectionName, query) {
+        return this.db.collection(collectionName).find(query).toArray()
         // db.close()
     },
-    findOne: async function (collectionName, query) {
-        return await this.db.collection(collectionName).findOne(query)
+    findOne: function (collectionName, query) {
+        return this.db.collection(collectionName).findOne(query)
         // db.close()
     },
-    findAndSort: async function (collectionName, query, sort, options) {
+    findAndSort: function (collectionName, query, sort, options) {
         if (options && options.limit) {
             options.skip = options.skip || 0
-            return await this.db.collection(collectionName).find(query).sort(sort).limit(options.limit).skip(options.skip).toArray()
+            return this.db.collection(collectionName).find(query).sort(sort).limit(options.limit).skip(options.skip).toArray()
         } else {
-            return await this.db.collection(collectionName).find(query).sort(sort).toArray()
+            return this.db.collection(collectionName).find(query).sort(sort).toArray()
         }
         // db.close()
     }
