@@ -79,36 +79,10 @@ router.post('/:model_name/update', async (ctx, next) => {
         ctx.body = errRes('路由服务异常')
     }
 })
-// 复杂查询实体对象
-router.post('/:model_name/query', async (ctx, next) => {
-    try {
-        let result = await mongodb.find(ctx.params.model_name, ctx.request.body)
-        ctx.body = okRes(result)
-        return next()
-    } catch (error) {
-        log.error(error)
-        ctx.body = errRes('路由服务异常')
-    }
-})
-// 复杂分页查询实体对象
-router.post('/:model_name/page', async (ctx, next) => {
-    try {
-        let options = ctx.request.body.options
-        let sort = ctx.request.body.sort
-        delete ctx.request.body.options
-        delete ctx.request.body.sort
-        let result = await mongodb.findAndSort(ctx.params.model_name, ctx.request.body, sort, options)
-        ctx.body = okRes(result)
-        return next()
-    } catch (error) {
-        log.error(error)
-        ctx.body = errRes('路由服务异常')
-    }
-})
 // 复杂GET查询实体对象
 router.get('/:model_name/query', async (ctx, next) => {
     try {
-        let result = await mongodb.find(ctx.params.model_name, ctx.params)
+        let result = await mongodb.find(ctx.params.model_name, ctx.request.query)
         ctx.body = okRes(result)
         return next()
     } catch (error) {
@@ -123,7 +97,7 @@ router.get('/:model_name/page', async (ctx, next) => {
         let sort = ctx.params.sort
         delete ctx.params.options
         delete ctx.params.sort
-        let result = await mongodb.findAndSort(ctx.params.model_name, ctx.params, sort, options)
+        let result = await mongodb.findAndSort(ctx.params.model_name, ctx.request.query, sort, options)
         ctx.body = okRes(result)
         return next()
     } catch (error) {
@@ -171,6 +145,32 @@ router.get('/:model_name/destroy/:id', async (ctx, next) => {
         const query = { '_id': ObjectId(ctx.params.id) }
         let result = await mongodb.remove(ctx.params.model_name, query)
         ctx.body = okRes(result.result.n.toString())
+        return next()
+    } catch (error) {
+        log.error(error)
+        ctx.body = errRes('路由服务异常')
+    }
+})
+// 复杂查询实体对象
+router.post('/:model_name/query', async (ctx, next) => {
+    try {
+        let result = await mongodb.find(ctx.params.model_name, ctx.request.body)
+        ctx.body = okRes(result)
+        return next()
+    } catch (error) {
+        log.error(error)
+        ctx.body = errRes('路由服务异常')
+    }
+})
+// 复杂分页查询实体对象
+router.post('/:model_name/page', async (ctx, next) => {
+    try {
+        let options = ctx.request.body.options
+        let sort = ctx.request.body.sort
+        delete ctx.request.body.options
+        delete ctx.request.body.sort
+        let result = await mongodb.findAndSort(ctx.params.model_name, ctx.request.body, sort, options)
+        ctx.body = okRes(result)
         return next()
     } catch (error) {
         log.error(error)
