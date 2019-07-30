@@ -25,11 +25,11 @@ var mongodb = {
     },
     findSort: function (collectionName, query, options) {
         let limit = options.limit
-        let skip = options.skip || 0
+        let skip = options.skip
         let sort = {}
         sort[options.sortBy] = +options.sortOrder
         if (limit) {
-            return this.db.collection(collectionName).find(query).sort(sort).limit(limit).skip(skip).toArray()
+            return this.db.collection(collectionName).find(query).sort(sort).limit(+limit).skip(+skip).toArray()
         } else {
             return this.db.collection(collectionName).find(query).sort(sort).toArray()
         }
