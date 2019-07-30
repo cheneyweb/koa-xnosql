@@ -12,10 +12,6 @@ var mongodb = {
         return this.db.collection(collectionName).updateOne(query, obj)
         // db.close()
     },
-    remove: function (collectionName, query) {
-        return this.db.collection(collectionName).remove(query)
-        // db.close()
-    },
     deleteOne: function (collectionName, query) {
         return this.db.collection(collectionName).deleteOne(query)
     },
@@ -25,6 +21,24 @@ var mongodb = {
     },
     findOne: function (collectionName, query) {
         return this.db.collection(collectionName).findOne(query)
+        // db.close()
+    },
+    findAndSort: function (collectionName, query, options) {
+        let limit = options.limit
+        let skip = options.skip || 0
+        let sort = {}
+        sort[options.sortBy] = +options.sortOrder
+        if (limit) {
+            return this.db.collection(collectionName).find(query).sort(sort).limit(limit).skip(skip).toArray()
+        } else {
+            return this.db.collection(collectionName).find(query).sort(sort).toArray()
+        }
+        // db.close()
+    },
+
+    // 已废弃
+    remove: function (collectionName, query) {
+        return this.db.collection(collectionName).remove(query)
         // db.close()
     },
     findAndSort: function (collectionName, query, sort, options) {

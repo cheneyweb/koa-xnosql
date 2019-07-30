@@ -93,11 +93,15 @@ router.get('/:model_name/query', async (ctx, next) => {
 // 复杂GET分页查询实体对象
 router.get('/:model_name/page', async (ctx, next) => {
     try {
-        let options = ctx.params.options
-        let sort = ctx.params.sort
-        delete ctx.params.options
-        delete ctx.params.sort
-        let result = await mongodb.findAndSort(ctx.params.model_name, ctx.request.query, sort, options)
+        let skip = ctx.request.query.skip
+        let limit = ctx.request.query.limit
+        let sortBy = ctx.request.query.sortBy
+        let sortOrder = ctx.request.query.sortOrder
+        delete ctx.request.query.skip
+        delete ctx.request.query.limit
+        delete ctx.request.query.sortBy
+        delete ctx.request.query.sortOrder
+        let result = await mongodb.findAndSort(ctx.params.model_name, ctx.request.query, { skip, limit, sortBy, sortOrder })
         ctx.body = okRes(result)
         return next()
     } catch (error) {
