@@ -101,7 +101,7 @@ router.get('/:model_name/page', async (ctx, next) => {
         delete ctx.request.query.limit
         delete ctx.request.query.sortBy
         delete ctx.request.query.sortOrder
-        let result = await mongodb.findAndSort(ctx.params.model_name, ctx.request.query, { skip, limit, sortBy, sortOrder })
+        let result = await mongodb.findSort(ctx.params.model_name, ctx.request.query, { skip, limit, sortBy, sortOrder })
         ctx.body = okRes(result)
         return next()
     } catch (error) {

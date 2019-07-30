@@ -23,7 +23,7 @@ var mongodb = {
         return this.db.collection(collectionName).findOne(query)
         // db.close()
     },
-    findAndSort: function (collectionName, query, options) {
+    findSort: function (collectionName, query, options) {
         let limit = options.limit
         let skip = options.skip || 0
         let sort = {}
