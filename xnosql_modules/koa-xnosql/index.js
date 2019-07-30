@@ -39,7 +39,7 @@ router.init = function (app, options) {
             app.use(mount(controllerRoot, router.routes()))
         }
     })
-    log.info('xnosql所有后置路由已加载')
+    // log.info('xnosql所有后置路由已加载')
 }
 // 配置路由与实体对象的绑定
 // 创建实体对象
