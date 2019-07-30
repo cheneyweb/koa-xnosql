@@ -70,6 +70,7 @@ router.post('/:model_name/update', async (ctx, next) => {
     try {
         const query = ctx.request.body.id ? { 'id': ctx.request.body.id } : { '_id': ObjectId(ctx.request.body._id) }
         delete ctx.request.body._id
+        delete ctx.request.body.id
         let result = await mongodb.update(ctx.params.model_name, query, { $set: ctx.request.body })
         ctx.body = okRes(result.result.nModified.toString())
         return next()
