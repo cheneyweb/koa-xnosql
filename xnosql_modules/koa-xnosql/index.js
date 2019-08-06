@@ -38,7 +38,6 @@ router.init = function (app, options) {
     })
     // log.info('xnosql所有后置路由已加载')
 }
-// 配置路由与实体对象的绑定
 // 创建实体对象
 router.post('/:model_name/create', async (ctx, next) => {
     let result
@@ -100,13 +99,12 @@ router.get('/:model_name/page', async (ctx, next) => {
         let limit = ctx.request.query.limit
         let sortBy = ctx.request.query.sortBy
         let sortOrder = ctx.request.query.sortOrder
+        let sort = {}
+        sort[sortBy] = +sortOrder
         delete ctx.request.query.skip
         delete ctx.request.query.limit
         delete ctx.request.query.sortBy
         delete ctx.request.query.sortOrder
-
-        let sort = {}
-        sort[sortBy] = +sortOrder
         if (limit) {
             result = await this.mongodb.collection(ctx.params.model_name).find(ctx.request.query).sort(sort).limit(+limit).skip(+skip).toArray()
         } else {

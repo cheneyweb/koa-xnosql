@@ -32,30 +32,28 @@ NoSql服务应用，基于koa-xnosql中间件，快速构建轻量小巧灵活�
 RESTful规则
 >
 	[POST]http://host:port/xnosql/MODEL/create
+	[POST]http://host:port/xnosql/MODEL/destroy/:id
 	[POST]http://host:port/xnosql/MODEL/update
-	[POST]http://host:port/xnosql/MODEL/query
-	[POST]http://host:port/xnosql/MODEL/page
+	[GET ]http://host:port/xnosql/MODEL/query
+	[GET ]http://host:port/xnosql/MODEL/page
 	[GET ]http://host:port/xnosql/MODEL/get/:id
-	[GET ]http://host:port/xnosql/MODEL/destroy/:id
 
 例子
 >
 	以一个用户模块为例，需要对用户进行增删改查:
-	需要注意的是默认自动创建id,createdAt,updatedAt三个字段，无须人工处理
+	需要注意的是_id或id可进行匹配处理
 	[POST]http://host:port/xnosql/user_model/create
 		post body:{"username":"cheney","password":"123"}
+	[POST]http://host:port/xnosql/user_model/destroy/1
 	[POST]http://host:port/xnosql/user_model/update
 		post body:{id:1,"username":"cheney","password":"456"}
-	[POST]http://host:port/xnosql/user_model/query
-		post body:{"username":"cheney","password":"123"}
-	[POST]http://host:port/xnosql/user_model/page
-		post body:{"username":"cheney","password":"123","sort":{"datetimeCreate":-1},"options":{"limit":10,"skip":5}}
-	[GET]http://host:port/xnosql/user_model/get/1
-	[GET]http://host:port/xnosql/user_model/destroy/1
+	[GET ]http://host:port/xnosql/user_model/query?username=cheney
+	[GET ]http://host:port/xnosql/user_model/page?sortBy=createAt&sortOrder=-1
+	[GET ]http://host:port/xnosql/user_model/get/1
 
 帮助联系
 >
-	作者:cheneyxu，chenxingling
+	作者:cheneyxu
 	邮箱:457299596@qq.com
 	QQ:457299596
 
