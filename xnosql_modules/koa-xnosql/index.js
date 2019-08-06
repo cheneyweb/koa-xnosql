@@ -43,9 +43,9 @@ router.post('/:model_name/create', async (ctx, next) => {
     let result
     try {
         if (ctx.request.body.constructor == Array) {
-            result = await this.mongodb.collection(ctx.params.model_name).insertMany(ctx.request.body)
+            result = await router.mongodb.collection(ctx.params.model_name).insertMany(ctx.request.body)
         } else {
-            result = await this.mongodb.collection(ctx.params.model_name).insertOne(ctx.request.body)
+            result = await router.mongodb.collection(ctx.params.model_name).insertOne(ctx.request.body)
         }
         ctx.body = okRes(result.insertedId)
         return next()
@@ -58,7 +58,7 @@ router.post('/:model_name/create', async (ctx, next) => {
 router.post('/:model_name/delete/:id', async (ctx, next) => {
     try {
         const query = ctx.params.id ? { 'id': isNaN(ctx.params.id) ? ctx.params.id : +ctx.params.id } : { '_id': ObjectId(ctx.params.id) }
-        let result = await this.mongodb.collection(ctx.params.model_name).deleteOne(query)
+        let result = await router.mongodb.collection(ctx.params.model_name).deleteOne(query)
         ctx.body = okRes(result.result.n.toString())
         return next()
     } catch (error) {
@@ -72,7 +72,7 @@ router.post('/:model_name/update', async (ctx, next) => {
         const query = ctx.request.body.id ? { 'id': ctx.request.body.id } : { '_id': ObjectId(ctx.request.body._id) }
         delete ctx.request.body._id
         delete ctx.request.body.id
-        let result = await this.mongodb.collection(ctx.params.model_name).updateOne(query, { $set: ctx.request.body })
+        let result = await router.mongodb.collection(ctx.params.model_name).updateOne(query, { $set: ctx.request.body })
         ctx.body = okRes(result.result.nModified.toString())
         return next()
     } catch (error) {
@@ -83,7 +83,7 @@ router.post('/:model_name/update', async (ctx, next) => {
 // 复杂GET查询实体对象
 router.get('/:model_name/query', async (ctx, next) => {
     try {
-        let result = await this.mongodb.collection(ctx.params.model_name).find(ctx.request.query).toArray()
+        let result = await router.mongodb.collection(ctx.params.model_name).find(ctx.request.query).toArray()
         ctx.body = okRes(result)
         return next()
     } catch (error) {
@@ -106,9 +106,9 @@ router.get('/:model_name/page', async (ctx, next) => {
         delete ctx.request.query.sortBy
         delete ctx.request.query.sortOrder
         if (limit) {
-            result = await this.mongodb.collection(ctx.params.model_name).find(ctx.request.query).sort(sort).limit(+limit).skip(+skip).toArray()
+            result = await router.mongodb.collection(ctx.params.model_name).find(ctx.request.query).sort(sort).limit(+limit).skip(+skip).toArray()
         } else {
-            result = await this.mongodb.collection(ctx.params.model_name).find(ctx.request.query).sort(sort).toArray()
+            result = await router.mongodb.collection(ctx.params.model_name).find(ctx.request.query).sort(sort).toArray()
         }
         ctx.body = okRes(result)
         return next()
@@ -121,7 +121,7 @@ router.get('/:model_name/page', async (ctx, next) => {
 router.get('/:model_name/get/:id', async (ctx, next) => {
     try {
         const query = ctx.params.id ? { 'id': isNaN(ctx.params.id) ? ctx.params.id : +ctx.params.id } : { '_id': ObjectId(ctx.params.id) }
-        let result = await this.mongodb.collection(ctx.params.model_name).findOne(query)
+        let result = await router.mongodb.collection(ctx.params.model_name).findOne(query)
         ctx.body = okRes(result)
         return next()
     } catch (error) {
