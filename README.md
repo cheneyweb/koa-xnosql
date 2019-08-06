@@ -73,3 +73,4 @@ RESTful规则
 	2019.01.13:增加mongodb的封装方法对于insertOne和insertMany的判断
 	2019.07.10:更新所有依赖
 	2019.07.30:兼容id与_id，精简日志，2.0版本推出
+	2019.08.06:采用原生mondodb对象，重构API

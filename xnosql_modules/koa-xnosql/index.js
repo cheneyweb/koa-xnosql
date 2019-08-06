@@ -7,7 +7,6 @@ const router = new Router()
 const fs = require('fs')
 // 持久化相关
 const MongoClient = require('mongodb').MongoClient
-const mongodb = require(__dirname + '/mongodb/mongodb.js')
 const ObjectId = require('mongodb').ObjectID
 // 日志相关
 const log = require('tracer').colorConsole()
@@ -18,9 +17,7 @@ const log = require('tracer').colorConsole()
 router.init = function (app, options) {
     MongoClient.connect(options.mongodbUrl, { useNewUrlParser: true }, (err, database) => {
         if (err) throw err
-        mongodb.db = database.db(options.mongodbUrl.substring(options.mongodbUrl.lastIndexOf('/') + 1, options.mongodbUrl.length))
-        router.mongodb = mongodb
-        global.mongodb = mongodb
+        global.mongodb = router.mongodb = database.db(options.mongodbUrl.substring(options.mongodbUrl.lastIndexOf('/') + 1, options.mongodbUrl.length))
     })
     const middlewareDir = `${process.cwd()}${options.middlewareDir || '/src/middleware/'}`
     const controllerRoot = options.xnosqlRoot || '/xnosql'
@@ -44,8 +41,13 @@ router.init = function (app, options) {
 // 配置路由与实体对象的绑定
 // 创建实体对象
 router.post('/:model_name/create', async (ctx, next) => {
+    let result
     try {
-        let result = await mongodb.insert(ctx.params.model_name, ctx.request.body)
+        if (ctx.request.body.constructor == Array) {
+            result = await this.mongodb.collection(ctx.params.model_name).insertMany(ctx.request.body)
+        } else {
+            result = await this.mongodb.collection(ctx.params.model_name).insertOne(ctx.request.body)
+        }
         ctx.body = okRes(result.insertedId)
         return next()
     } catch (error) {
@@ -57,7 +59,7 @@ router.post('/:model_name/create', async (ctx, next) => {
 router.post('/:model_name/delete/:id', async (ctx, next) => {
     try {
         const query = ctx.params.id ? { 'id': isNaN(ctx.params.id) ? ctx.params.id : +ctx.params.id } : { '_id': ObjectId(ctx.params.id) }
-        let result = await mongodb.deleteOne(ctx.params.model_name, query)
+        let result = await this.mongodb.collection(ctx.params.model_name).deleteOne(query)
         ctx.body = okRes(result.result.n.toString())
         return next()
     } catch (error) {
@@ -71,7 +73,7 @@ router.post('/:model_name/update', async (ctx, next) => {
         const query = ctx.request.body.id ? { 'id': ctx.request.body.id } : { '_id': ObjectId(ctx.request.body._id) }
         delete ctx.request.body._id
         delete ctx.request.body.id
-        let result = await mongodb.update(ctx.params.model_name, query, { $set: ctx.request.body })
+        let result = await this.mongodb.collection(ctx.params.model_name).updateOne(query, { $set: ctx.request.body })
         ctx.body = okRes(result.result.nModified.toString())
         return next()
     } catch (error) {
@@ -82,7 +84,7 @@ router.post('/:model_name/update', async (ctx, next) => {
 // 复杂GET查询实体对象
 router.get('/:model_name/query', async (ctx, next) => {
     try {
-        let result = await mongodb.find(ctx.params.model_name, ctx.request.query)
+        let result = await this.mongodb.collection(ctx.params.model_name).find(ctx.request.query).toArray()
         ctx.body = okRes(result)
         return next()
     } catch (error) {
@@ -92,6 +94,7 @@ router.get('/:model_name/query', async (ctx, next) => {
 })
 // 复杂GET分页查询实体对象
 router.get('/:model_name/page', async (ctx, next) => {
+    let result
     try {
         let skip = ctx.request.query.skip
         let limit = ctx.request.query.limit
@@ -101,7 +104,14 @@ router.get('/:model_name/page', async (ctx, next) => {
         delete ctx.request.query.limit
         delete ctx.request.query.sortBy
         delete ctx.request.query.sortOrder
-        let result = await mongodb.findSort(ctx.params.model_name, ctx.request.query, { skip, limit, sortBy, sortOrder })
+
+        let sort = {}
+        sort[sortBy] = +sortOrder
+        if (limit) {
+            result = await this.mongodb.collection(ctx.params.model_name).find(ctx.request.query).sort(sort).limit(+limit).skip(+skip).toArray()
+        } else {
+            result = await this.mongodb.collection(ctx.params.model_name).find(ctx.request.query).sort(sort).toArray()
+        }
         ctx.body = okRes(result)
         return next()
     } catch (error) {
@@ -113,7 +123,7 @@ router.get('/:model_name/page', async (ctx, next) => {
 router.get('/:model_name/get/:id', async (ctx, next) => {
     try {
         const query = ctx.params.id ? { 'id': isNaN(ctx.params.id) ? ctx.params.id : +ctx.params.id } : { '_id': ObjectId(ctx.params.id) }
-        let result = await mongodb.findOne(ctx.params.model_name, query)
+        let result = await this.mongodb.collection(ctx.params.model_name).findOne(query)
         ctx.body = okRes(result)
         return next()
     } catch (error) {
@@ -122,71 +132,71 @@ router.get('/:model_name/get/:id', async (ctx, next) => {
     }
 })
 
-// 旧版本兼容
-router.post('/:model_name/insert', async (ctx, next) => {
-    try {
-        let result = await mongodb.insert(ctx.params.model_name, ctx.request.body)
-        ctx.body = okRes(result.insertedId)
-        return next()
-    } catch (error) {
-        log.error(error)
-        ctx.body = errRes('路由服务异常')
-    }
-})
-router.get('/:model_name/delete/:id', async (ctx, next) => {
-    try {
-        const query = { '_id': ObjectId(ctx.params.id) }
-        let result = await mongodb.remove(ctx.params.model_name, query)
-        ctx.body = okRes(result.result.n.toString())
-        return next()
-    } catch (error) {
-        log.error(error)
-        ctx.body = errRes('路由服务异常')
-    }
-})
-router.get('/:model_name/destroy/:id', async (ctx, next) => {
-    try {
-        const query = { '_id': ObjectId(ctx.params.id) }
-        let result = await mongodb.remove(ctx.params.model_name, query)
-        ctx.body = okRes(result.result.n.toString())
-        return next()
-    } catch (error) {
-        log.error(error)
-        ctx.body = errRes('路由服务异常')
-    }
-})
-// 复杂查询实体对象
-router.post('/:model_name/query', async (ctx, next) => {
-    try {
-        let result = await mongodb.find(ctx.params.model_name, ctx.request.body)
-        ctx.body = okRes(result)
-        return next()
-    } catch (error) {
-        log.error(error)
-        ctx.body = errRes('路由服务异常')
-    }
-})
-// 复杂分页查询实体对象
-router.post('/:model_name/page', async (ctx, next) => {
-    try {
-        let options = ctx.request.body.options
-        let sort = ctx.request.body.sort
-        delete ctx.request.body.options
-        delete ctx.request.body.sort
-        let result = await mongodb.findAndSort(ctx.params.model_name, ctx.request.body, sort, options)
-        ctx.body = okRes(result)
-        return next()
-    } catch (error) {
-        log.error(error)
-        ctx.body = errRes('路由服务异常')
-    }
-})
+// // 旧版本兼容
+// router.post('/:model_name/insert', async (ctx, next) => {
+//     try {
+//         let result = await mongodb.insert(ctx.params.model_name, ctx.request.body)
+//         ctx.body = okRes(result.insertedId)
+//         return next()
+//     } catch (error) {
+//         log.error(error)
+//         ctx.body = errRes('路由服务异常')
+//     }
+// })
+// router.get('/:model_name/delete/:id', async (ctx, next) => {
+//     try {
+//         const query = { '_id': ObjectId(ctx.params.id) }
+//         let result = await mongodb.remove(ctx.params.model_name, query)
+//         ctx.body = okRes(result.result.n.toString())
+//         return next()
+//     } catch (error) {
+//         log.error(error)
+//         ctx.body = errRes('路由服务异常')
+//     }
+// })
+// router.get('/:model_name/destroy/:id', async (ctx, next) => {
+//     try {
+//         const query = { '_id': ObjectId(ctx.params.id) }
+//         let result = await mongodb.remove(ctx.params.model_name, query)
+//         ctx.body = okRes(result.result.n.toString())
+//         return next()
+//     } catch (error) {
+//         log.error(error)
+//         ctx.body = errRes('路由服务异常')
+//     }
+// })
+// // 复杂查询实体对象
+// router.post('/:model_name/query', async (ctx, next) => {
+//     try {
+//         let result = await mongodb.find(ctx.params.model_name, ctx.request.body)
+//         ctx.body = okRes(result)
+//         return next()
+//     } catch (error) {
+//         log.error(error)
+//         ctx.body = errRes('路由服务异常')
+//     }
+// })
+// // 复杂分页查询实体对象
+// router.post('/:model_name/page', async (ctx, next) => {
+//     try {
+//         let options = ctx.request.body.options
+//         let sort = ctx.request.body.sort
+//         delete ctx.request.body.options
+//         delete ctx.request.body.sort
+//         let result = await mongodb.findAndSort(ctx.params.model_name, ctx.request.body, sort, options)
+//         ctx.body = okRes(result)
+//         return next()
+//     } catch (error) {
+//         log.error(error)
+//         ctx.body = errRes('路由服务异常')
+//     }
+// })
 
 function okRes(res) {
-    return { err: false, res: res }
+    return { err: false, res }
 }
 function errRes(res) {
-    return { err: true, res: res }
+    return { err: true, res }
 }
 
 // function ucfirst(str) {
