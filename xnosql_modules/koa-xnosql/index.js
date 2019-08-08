@@ -16,10 +16,11 @@ function mongoConnect(options) {
     MongoClient.connect(options.mongodbUrl, { useNewUrlParser: true, ...options.mongoOption }, (err, database) => {
         if (err) {
             log.warn('mongo reconnecting...')
-            setTimeout(()=>mongoConnect(options), 1000)
+            setTimeout(() => mongoConnect(options), 1000)
         } else {
             global.mongo = database
             global.mongodb = router.mongodb = database.db(options.mongodbUrl.substring(options.mongodbUrl.lastIndexOf('/') + 1, options.mongodbUrl.length))
+            global.getMongoSession = async () => { return await (await database.startSession()).startTransaction() }
         }
     })
 }
