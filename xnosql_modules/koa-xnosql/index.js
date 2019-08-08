@@ -15,8 +15,10 @@ const log = require('tracer').colorConsole()
  * 初始化数据库连接，加载所有中间件路由
  */
 router.init = function (app, options) {
-    MongoClient.connect(options.mongodbUrl, { useNewUrlParser: true }, (err, database) => {
+    options.rs = options.rs || {}
+    MongoClient.connect(options.mongodbUrl, { useNewUrlParser: true, ...options.rs }, (err, database) => {
         if (err) throw err
+        global.mongo = database
         global.mongodb = router.mongodb = database.db(options.mongodbUrl.substring(options.mongodbUrl.lastIndexOf('/') + 1, options.mongodbUrl.length))
     })
     const middlewareDir = `${process.cwd()}${options.middlewareDir || '/src/middleware/'}`
