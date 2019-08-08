@@ -20,7 +20,11 @@ function mongoConnect(options) {
         } else {
             global.mongo = database
             global.mongodb = router.mongodb = database.db(options.mongodbUrl.substring(options.mongodbUrl.lastIndexOf('/') + 1, options.mongodbUrl.length))
-            global.getMongoSession = async () => { return await (await database.startSession()).startTransaction() }
+            global.getMongoSession = async () => {
+                const session = await database.startSession()
+                await session.startTransaction()
+                return session
+            }
         }
     })
 }
