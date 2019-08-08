@@ -11,16 +11,24 @@ const ObjectId = require('mongodb').ObjectID
 // 日志相关
 const log = require('tracer').colorConsole()
 
+function mongoConnect(options) {
+    options.mongoOption = options.mongoOption || {}
+    MongoClient.connect(options.mongodbUrl, { useNewUrlParser: true, ...options.mongoOption }, (err, database) => {
+        if (err) {
+            log.warn('mongo reconnecting...')
+            setTimeout(mongoConnect(options), 1000)
+        } else {
+            global.mongo = database
+            global.mongodb = router.mongodb = database.db(options.mongodbUrl.substring(options.mongodbUrl.lastIndexOf('/') + 1, options.mongodbUrl.length))
+        }
+    })
+}
+
 /**
  * 初始化数据库连接，加载所有中间件路由
  */
 router.init = function (app, options) {
-    options.mongoOption = options.mongoOption || {}
-    MongoClient.connect(options.mongodbUrl, { useNewUrlParser: true, ...options.mongoOption }, (err, database) => {
-        if (err) return log.error(err)
-        global.mongo = database
-        global.mongodb = router.mongodb = database.db(options.mongodbUrl.substring(options.mongodbUrl.lastIndexOf('/') + 1, options.mongodbUrl.length))
-    })
+    mongoConnect(options)
     const middlewareDir = `${process.cwd()}${options.middlewareDir || '/src/middleware/'}`
     const controllerRoot = options.xnosqlRoot || '/xnosql'
     fs.readdirSync(middlewareDir).forEach((filename) => {
