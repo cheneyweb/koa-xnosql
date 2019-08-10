@@ -110,22 +110,27 @@ router.get('/:model_name/query', async (ctx, next) => {
 router.get('/:model_name/page', async (ctx, next) => {
     let result
     try {
-        let skip = ctx.request.query.skip
-        let limit = ctx.request.query.limit
-        let sortBy = ctx.request.query.sortBy
-        let sortOrder = ctx.request.query.sortOrder
+        let startKey = ctx.request.query.startKey       // 起始值
+        let sortBy = ctx.request.query.sortBy           // 索引键
+        let sortOrder = ctx.request.query.sortOrder     // 顺序
+        let limit = ctx.request.query.limit             // 返回数量
         let sort = {}
         sort[sortBy] = +sortOrder
-        delete ctx.request.query.skip
-        delete ctx.request.query.limit
+        delete ctx.request.query.startKey
         delete ctx.request.query.sortBy
         delete ctx.request.query.sortOrder
-        if (limit) {
-            result = await router.mongodb.collection(ctx.params.model_name).find(ctx.request.query).sort(sort).limit(+limit).skip(+skip).toArray()
-        } else {
-            result = await router.mongodb.collection(ctx.params.model_name).find(ctx.request.query).sort(sort).toArray()
+        delete ctx.request.query.limit
+        // 升序
+        if (sortOrder == 1 && startKey) {
+            ctx.request.query[sortBy] = { $gt: startKey }
         }
+        // 降序
+        else if (sortOrder == -1 && startKey) {
+            ctx.request.query[sortBy] = { $lt: startKey }
+        }
+        result = await router.mongodb.collection(ctx.params.model_name).find(ctx.request.query).sort(sort).limit(+limit).toArray()
         ctx.body = okRes(result)
+        ctx.body.startKey = result.length > 0 ? result[result.length - 1][sortBy] : null
         return next()
     } catch (error) {
         log.error(error)
