@@ -129,7 +129,7 @@ router.get('/:model_name/page', async (ctx, next) => {
         }
         result = await router.mongodb.collection(ctx.params.model_name).find(ctx.request.query).sort(sort).limit(limit).toArray()
         ctx.body = okRes(result)
-        ctx.body.startKey = result.length > 0 ? result[result.length - 1][sortBy] : null
+        ctx.body.startKey = result.length == limit ? result[limit - 1][sortBy] : null
         return next()
     } catch (error) {
         log.error(error)
