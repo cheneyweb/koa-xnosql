@@ -22,7 +22,10 @@ function mongoConnect(options) {
             global.mongodb = router.mongodb = database.db(options.mongodbUrl.substring(options.mongodbUrl.lastIndexOf('/') + 1, options.mongodbUrl.length))
             global.getMongoSession = async () => {
                 const session = await database.startSession()
-                await session.startTransaction()
+                await session.startTransaction({
+                    readConcern: { level: 'majority' },
+                    writeConcern: { w: 'majority' }
+                })
                 return session
             }
         }
@@ -98,7 +101,9 @@ router.post('/:model_name/update', async (ctx, next) => {
 // 复杂GET查询实体对象
 router.get('/:model_name/query', async (ctx, next) => {
     try {
-        let result = await router.mongodb.collection(ctx.params.model_name).find(ctx.request.query).toArray()
+        let findOption = ctx.request.query.findOption                   // 查询选项
+        delete ctx.request.query.findOption
+        let result = await router.mongodb.collection(ctx.params.model_name).find(ctx.request.query, findOption).toArray()
         ctx.body = okRes(result)
         return next()
     } catch (error) {
@@ -108,17 +113,18 @@ router.get('/:model_name/query', async (ctx, next) => {
 })
 // 复杂GET分页查询实体对象
 router.get('/:model_name/page', async (ctx, next) => {
-    let result
     try {
         let sort = {}
         let startKey = ctx.request.query.startKey                       // 起始值
         let sortBy = ctx.request.query.sortBy                           // 索引键
         let sortOrder = sort[sortBy] = +ctx.request.query.sortOrder     // 顺序
         let limit = +ctx.request.query.limit                            // 返回数量
+        let findOption = ctx.request.query.findOption                   // 查询选项
         delete ctx.request.query.startKey
         delete ctx.request.query.sortBy
         delete ctx.request.query.sortOrder
         delete ctx.request.query.limit
+        delete ctx.request.query.findOption
         // 升序
         if (sortOrder == 1 && startKey) {
             ctx.request.query[sortBy] = { $gt: startKey }
@@ -127,7 +133,7 @@ router.get('/:model_name/page', async (ctx, next) => {
         else if (sortOrder == -1 && startKey) {
             ctx.request.query[sortBy] = { $lt: startKey }
         }
-        result = await router.mongodb.collection(ctx.params.model_name).find(ctx.request.query).sort(sort).limit(limit).toArray()
+        let result = await router.mongodb.collection(ctx.params.model_name).find(ctx.request.query, findOption).sort(sort).limit(limit).toArray()
         ctx.body = okRes(result)
         ctx.body.startKey = result.length == limit ? result[limit - 1][sortBy] : null
         return next()
@@ -139,8 +145,10 @@ router.get('/:model_name/page', async (ctx, next) => {
 // 简单GET获取实体对象
 router.get('/:model_name/get/:id', async (ctx, next) => {
     try {
+        let findOption = ctx.request.query.findOption                   // 查询选项
+        delete ctx.request.query.findOption
         const query = ctx.params.id ? { 'id': isNaN(ctx.params.id) ? ctx.params.id : +ctx.params.id } : { '_id': ObjectId(ctx.params.id) }
-        let result = await router.mongodb.collection(ctx.params.model_name).findOne(query)
+        let result = await router.mongodb.collection(ctx.params.model_name).findOne(query, findOption)
         ctx.body = okRes(result)
         return next()
     } catch (error) {
