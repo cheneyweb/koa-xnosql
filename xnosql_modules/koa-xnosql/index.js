@@ -9,6 +9,7 @@ const fs = require('fs')
 const MongoClient = require('mongodb').MongoClient
 const ObjectId = require('mongodb').ObjectID
 // 日志相关
+const moment = require('moment')
 const log = require('tracer').colorConsole()
 
 function mongoConnect(options) {
@@ -39,6 +40,7 @@ router.init = function (app, options) {
     mongoConnect(options)
     const middlewareDir = `${process.cwd()}${options.middlewareDir || '/src/middleware/'}`
     const controllerRoot = options.xnosqlRoot || '/xnosql'
+    router.xnosqlOption = options
     fs.readdirSync(middlewareDir).forEach((filename) => {
         if (filename.startsWith('pre')) {
             let router = require(`${middlewareDir}/${filename}`)
@@ -58,6 +60,10 @@ router.init = function (app, options) {
 }
 // 创建实体对象
 router.post('/:model_name/create', async (ctx, next) => {
+    if (router.xnosqlOption.defaultCreateAt) {
+        ctx.request.body[router.xnosqlOption.defaultCreateAt] = Date.now()
+        ctx.request.body[`${router.xnosqlOption.defaultCreateAt}Str`] = moment(ctx.request.body[router.xnosqlOption.defaultCreateAt]).utcOffset(router.xnosqlOption.defaultUTC || 8).format('YYYY-MM-DD mm:hh:ss')
+    }
     let result
     try {
         if (ctx.request.body.constructor == Array) {
@@ -115,11 +121,11 @@ router.get('/:model_name/query', async (ctx, next) => {
 router.get('/:model_name/page', async (ctx, next) => {
     try {
         let sort = {}
-        let startKey = ctx.request.query.startKey                       // 起始值
-        let sortBy = ctx.request.query.sortBy                           // 索引键
-        let sortOrder = sort[sortBy] = +ctx.request.query.sortOrder     // 顺序
-        let limit = +ctx.request.query.limit                            // 返回数量
-        let findOption = ctx.request.query.findOption                   // 查询选项
+        let startKey = ctx.request.query.startKey                                                                   // 起始值
+        let sortBy = ctx.request.query.sortBy || router.xnosqlOption.defaultSortBy || 'id'                          // 索引键
+        let sortOrder = sort[sortBy] = +ctx.request.query.sortOrder || router.xnosqlOption.defaultSortOrder || -1   // 顺序
+        let limit = +ctx.request.query.limit || router.xnosqlOption.defaultLimit || 100                             // 返回数量
+        let findOption = ctx.request.query.findOption                                                               // 查询选项
         delete ctx.request.query.startKey
         delete ctx.request.query.sortBy
         delete ctx.request.query.sortOrder
