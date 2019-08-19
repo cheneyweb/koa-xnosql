@@ -62,7 +62,7 @@ router.init = function (app, options) {
 router.post('/:model_name/create', async (ctx, next) => {
     if (router.xnosqlOption.defaultCreateAt) {
         ctx.request.body[router.xnosqlOption.defaultCreateAt] = Date.now()
-        ctx.request.body[`${router.xnosqlOption.defaultCreateAt}Str`] = moment(ctx.request.body[router.xnosqlOption.defaultCreateAt]).utcOffset(router.xnosqlOption.defaultUTC || 8).format('YYYY-MM-DD mm:hh:ss')
+        ctx.request.body[`${router.xnosqlOption.defaultCreateAt}Str`] = moment(ctx.request.body[router.xnosqlOption.defaultCreateAt]).utcOffset(router.xnosqlOption.defaultUTC || 8).format('YYYY-MM-DD HH:mm:ss')
     }
     let result
     try {
