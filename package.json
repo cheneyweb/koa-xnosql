@@ -7,13 +7,13 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "config": "^3.1.0",
-    "koa": "^2.7.0",
-    "koa-body": "^4.1.0",
+    "config": "^3.2.4",
+    "koa": "^2.11.0",
+    "koa-body": "^4.1.1",
     "koa-mount": "^4.0.0",
     "koa-router": "^7.4.0",
-    "mongodb": "^3.2.7",
-    "tracer": "^0.9.8"
+    "mongodb": "^3.4.1",
+    "tracer": "^1.0.1"
   },
   "author": "cheneyxu",
   "license": "ISC"

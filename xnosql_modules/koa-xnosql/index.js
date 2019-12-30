@@ -81,7 +81,7 @@ router.post('/:model_name/create', async (ctx, next) => {
 // 删除实体对象
 router.post('/:model_name/delete/:id', async (ctx, next) => {
     try {
-        const query = ctx.params.id ? { 'id': isNaN(ctx.params.id) ? ctx.params.id : +ctx.params.id } : { '_id': ObjectId(ctx.params.id) }
+        const query = ctx.params.id.length != 24 ? { 'id': isNaN(ctx.params.id) ? ctx.params.id : +ctx.params.id } : { '_id': ObjectId(ctx.params.id) }
         let result = await router.mongodb.collection(ctx.params.model_name).deleteOne(query)
         ctx.body = okRes(result.result.n.toString())
         return next()
