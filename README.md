@@ -32,7 +32,7 @@ NoSql服务应用，基于koa-xnosql中间件，快速构建轻量小巧灵活�
 RESTful规则
 >
 	[POST]http://host:port/xnosql/MODEL/create
-	[POST]http://host:port/xnosql/MODEL/destroy/:id
+	[POST]http://host:port/xnosql/MODEL/delete/:id
 	[POST]http://host:port/xnosql/MODEL/update
 	[GET ]http://host:port/xnosql/MODEL/query
 	[GET ]http://host:port/xnosql/MODEL/page
@@ -44,10 +44,11 @@ RESTful规则
 	需要注意的是_id或id可进行匹配处理
 	[POST]http://host:port/xnosql/user_model/create
 		post body:{"username":"cheney","password":"123"}
-	[POST]http://host:port/xnosql/user_model/destroy/1
+	[POST]http://host:port/xnosql/user_model/delete/1
 	[POST]http://host:port/xnosql/user_model/update
 		post body:{id:1,"username":"cheney","password":"456"}
 	[GET ]http://host:port/xnosql/user_model/query?username=cheney
+	[GET ]http://host:port/xnosql/user_model/feed?skip=
 	[GET ]http://host:port/xnosql/user_model/page?sortBy=createAt&sortOrder=-1
 	[GET ]http://host:port/xnosql/user_model/get/1
 
@@ -79,6 +80,7 @@ RESTful规则
 	2019.08.13:增加默认配置项
 	2019.08.19:创建时间修正，mongodb驱动更新
 	2019.12.30:删除接口默认24位ID为_id，依赖更新
+	2020.06.19:新增跳页接口，依赖更新
 
 
 

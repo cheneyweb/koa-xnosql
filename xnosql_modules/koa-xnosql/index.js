@@ -60,6 +60,9 @@ router.init = function (app, options) {
 }
 // 创建实体对象
 router.post('/:model_name/create', async (ctx, next) => {
+    if (router.xnosqlOption.defaultId && !ctx.request.body._id) {
+        ctx.request.body._id = _generateUUID()
+    }
     if (router.xnosqlOption.defaultCreateAt) {
         ctx.request.body[router.xnosqlOption.defaultCreateAt] = Date.now()
         ctx.request.body[`${router.xnosqlOption.defaultCreateAt}Str`] = moment(ctx.request.body[router.xnosqlOption.defaultCreateAt]).utcOffset(router.xnosqlOption.defaultUTC || 8).format('YYYY-MM-DD HH:mm:ss')
@@ -80,8 +83,13 @@ router.post('/:model_name/create', async (ctx, next) => {
 })
 // 删除实体对象
 router.post('/:model_name/delete/:id', async (ctx, next) => {
+    let query
     try {
-        const query = ctx.params.id.length != 24 ? { 'id': isNaN(ctx.params.id) ? ctx.params.id : +ctx.params.id } : { '_id': ObjectId(ctx.params.id) }
+        if (router.xnosqlOption.defaultId) {
+            query = { _id: ctx.params.id }
+        } else {
+            query = ctx.params.id.length != 24 ? { 'id': isNaN(ctx.params.id) ? ctx.params.id : +ctx.params.id } : { '_id': ObjectId(ctx.params.id) }
+        }
         let result = await router.mongodb.collection(ctx.params.model_name).deleteOne(query)
         ctx.body = okRes(result.result.n.toString())
         return next()
@@ -92,8 +100,13 @@ router.post('/:model_name/delete/:id', async (ctx, next) => {
 })
 // 更新实体对象(根据ID替换)
 router.post('/:model_name/update', async (ctx, next) => {
+    let query
     try {
-        const query = ctx.request.body.id ? { 'id': ctx.request.body.id } : { '_id': ObjectId(ctx.request.body._id) }
+        if (router.xnosqlOption.defaultId) {
+            query = { _id: ctx.request.body._id || ctx.request.body.id }
+        } else {
+            query = ctx.request.body.id ? { 'id': ctx.request.body.id } : { '_id': ObjectId(ctx.request.body._id) }
+        }
         delete ctx.request.body._id
         delete ctx.request.body.id
         let result = await router.mongodb.collection(ctx.params.model_name).updateOne(query, { $set: ctx.request.body })
@@ -117,6 +130,36 @@ router.get('/:model_name/query', async (ctx, next) => {
         ctx.body = errRes('路由服务异常')
     }
 })
+// 跳页分页查询
+router.get('/:model_name/feed', async (ctx, next) => {
+    try {
+        let skip = +ctx.request.query.skip || 0
+        let limit = +ctx.request.query.limit || router.xnosqlOption.defaultLimit || 100
+        let sort = {}
+        // 自定义排序
+        if (ctx.request.query.sort) {
+            sort = ctx.request.query.sort
+        }
+        // 默认排序
+        else {
+            let sortBy = ctx.request.query.sortBy || router.xnosqlOption.defaultSortBy || 'id'
+            sort[sortBy] = +ctx.request.query.sortOrder || router.xnosqlOption.defaultSortOrder || -1
+        }
+        delete ctx.request.query.skip
+        delete ctx.request.query.limit
+        delete ctx.request.query.sort
+        delete ctx.request.query.sortBy
+        delete ctx.request.query.sortOrder
+        let result = await router.mongodb.collection(ctx.params.model_name).find(ctx.request.query).sort(sort).limit(limit).skip(skip).toArray()
+        ctx.body = okRes(result)
+        ctx.body.skip = result.length > 0 ? skip + result.length : null
+        return next()
+    } catch (error) {
+        log.error(error)
+        ctx.body = errRes('路由服务异常')
+    }
+})
+
 // 复杂GET分页查询实体对象
 router.get('/:model_name/page', async (ctx, next) => {
     try {
@@ -150,10 +193,16 @@ router.get('/:model_name/page', async (ctx, next) => {
 })
 // 简单GET获取实体对象
 router.get('/:model_name/get/:id', async (ctx, next) => {
+    let query
     try {
-        let findOption = ctx.request.query.findOption                   // 查询选项
+        if (router.xnosqlOption.defaultId) {
+            query = { _id: ctx.params.id }
+        } else {
+            query = ctx.params.id ? { 'id': isNaN(ctx.params.id) ? ctx.params.id : +ctx.params.id } : { '_id': ObjectId(ctx.params.id) }
+        }
+        // 查询选项
+        let findOption = ctx.request.query.findOption
         delete ctx.request.query.findOption
-        const query = ctx.params.id ? { 'id': isNaN(ctx.params.id) ? ctx.params.id : +ctx.params.id } : { '_id': ObjectId(ctx.params.id) }
         let result = await router.mongodb.collection(ctx.params.model_name).findOne(query, findOption)
         ctx.body = okRes(result)
         return next()
@@ -222,6 +271,13 @@ router.get('/:model_name/get/:id', async (ctx, next) => {
 //         ctx.body = errRes('路由服务异常')
 //     }
 // })
+
+function _generateUUID() {
+    // let p0 = ("00000000" + Math.abs((Math.random() * 0xFFFFFFFF) | 0).toString(16)).substr(-8)
+    // let p1 = ("00000000" + Math.abs((Math.random() * 0xFFFFFFFF) | 0).toString(16)).substr(-8)
+    // return `${p0}${p1}`
+    return Date.now().toString(36)
+}
 
 function okRes(res) {
     return { err: false, res }

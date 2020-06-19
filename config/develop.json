@@ -11,6 +11,7 @@
         "defaultUTC": 8,
         "defaultSortBy": "id",
         "defaultSortOrder": -1,
-        "defaultLimit": 200
+        "defaultLimit": 200,
+        "defaultId": true
     }
 }

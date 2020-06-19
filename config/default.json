@@ -6,11 +6,16 @@
         "port": 3636,
         "xnosqlRoot": "/xnosql",
         "mongodbUrl": "mongodb://localhost:27017/test",
-        "mongodbName":"test",
+        "mongoOption": {
+            "useUnifiedTopology": true,
+            "useNewUrlParser": true
+        },
+        "mongodbName": "test",
         "defaultCreateAt": "createAt",
         "defaultUTC": 8,
         "defaultSortBy": "id",
         "defaultSortOrder": -1,
-        "defaultLimit": 200
+        "defaultLimit": 200,
+        "defaultId": true
     }
 }
