@@ -35,6 +35,7 @@ RESTful规则
 	[POST]http://host:port/xnosql/MODEL/delete/:id
 	[POST]http://host:port/xnosql/MODEL/update
 	[GET ]http://host:port/xnosql/MODEL/query
+	[GET ]http://host:port/xnosql/MODEL/feed
 	[GET ]http://host:port/xnosql/MODEL/page
 	[GET ]http://host:port/xnosql/MODEL/get/:id
 
@@ -48,7 +49,7 @@ RESTful规则
 	[POST]http://host:port/xnosql/user_model/update
 		post body:{id:1,"username":"cheney","password":"456"}
 	[GET ]http://host:port/xnosql/user_model/query?username=cheney
-	[GET ]http://host:port/xnosql/user_model/feed?skip=
+	[GET ]http://host:port/xnosql/user_model/feed?skip=&limit=
 	[GET ]http://host:port/xnosql/user_model/page?sortBy=createAt&sortOrder=-1
 	[GET ]http://host:port/xnosql/user_model/get/1
 
@@ -81,6 +82,7 @@ RESTful规则
 	2019.08.19:创建时间修正，mongodb驱动更新
 	2019.12.30:删除接口默认24位ID为_id，依赖更新
 	2020.06.19:新增跳页接口，依赖更新
+	2020.06.20:新增接口仅支持单条插入
 
 
 

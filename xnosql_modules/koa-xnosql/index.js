@@ -69,12 +69,12 @@ router.post('/:model_name/create', async (ctx, next) => {
     }
     let result
     try {
-        if (ctx.request.body.constructor == Array) {
-            result = await router.mongodb.collection(ctx.params.model_name).insertMany(ctx.request.body)
-        } else {
-            result = await router.mongodb.collection(ctx.params.model_name).insertOne(ctx.request.body)
-        }
-        ctx.body = okRes(result.insertedId)
+        // if (ctx.request.body.constructor == Array) {
+        //     result = await router.mongodb.collection(ctx.params.model_name).insertMany(ctx.request.body)
+        // } else {
+        result = await router.mongodb.collection(ctx.params.model_name).insertOne(ctx.request.body)
+        // };
+        ctx.body = okRes({ id: result.insertedId, ...ctx.request.body })
         return next()
     } catch (error) {
         log.error(error)
