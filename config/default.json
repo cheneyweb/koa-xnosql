@@ -16,6 +16,7 @@
         "defaultSortBy": "id",
         "defaultSortOrder": -1,
         "defaultLimit": 200,
-        "defaultId": true
+        "defaultId": true,
+        "defaultLog": true
     }
 }

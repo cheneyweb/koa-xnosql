@@ -145,12 +145,19 @@ router.get('/:model_name/feed', async (ctx, next) => {
             let sortBy = ctx.request.query.sortBy || router.xnosqlOption.defaultSortBy || 'id'
             sort[sortBy] = +ctx.request.query.sortOrder || router.xnosqlOption.defaultSortOrder || -1
         }
+        // 查询选项
+        let findOption = ctx.request.query.findOption
+        // 查询处理
         delete ctx.request.query.skip
         delete ctx.request.query.limit
         delete ctx.request.query.sort
         delete ctx.request.query.sortBy
         delete ctx.request.query.sortOrder
-        let result = await router.mongodb.collection(ctx.params.model_name).find(ctx.request.query).sort(sort).limit(limit).skip(skip).toArray()
+        // 输出查询日志
+        if (router.xnosqlOption.defaultLog) {
+            log.info(`\n[QUERY] ${JSON.stringify(ctx.request.query)}\n[OPTION] ${JSON.stringify(findOption)}\n[SORT] ${JSON.stringify(sort)}\n[LIMIT-SKIP] ${limit}-${skip}`)
+        }
+        let result = await router.mongodb.collection(ctx.params.model_name).find(ctx.request.query, findOption).sort(sort).limit(limit).skip(skip).toArray()
         ctx.body = okRes(result)
         ctx.body.skip = result.length > 0 ? skip + result.length : null
         return next()

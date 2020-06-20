@@ -6,12 +6,13 @@
         "port": 3636,
         "xnosqlRoot": "/xnosql",
         "mongodbUrl": "mongodb://localhost:27017/test",
-        "mongodbName":"test",
+        "mongodbName": "test",
         "defaultCreateAt": "createAt",
         "defaultUTC": 8,
         "defaultSortBy": "id",
         "defaultSortOrder": -1,
         "defaultLimit": 200,
-        "defaultId": true
+        "defaultId": true,
+        "defaultLog": true
     }
 }
