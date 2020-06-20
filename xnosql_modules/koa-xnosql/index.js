@@ -60,12 +60,19 @@ router.init = function (app, options) {
 }
 // 创建实体对象
 router.post('/:model_name/create', async (ctx, next) => {
-    if (router.xnosqlOption.defaultId && !ctx.request.body._id) {
-        ctx.request.body._id = _generateUUID()
+    if (router.xnosqlOption.defaultId) {
+        ctx.request.body[router.xnosqlOption.defaultId] = _generateUUID()
     }
     if (router.xnosqlOption.defaultCreateAt) {
         ctx.request.body[router.xnosqlOption.defaultCreateAt] = Date.now()
         ctx.request.body[`${router.xnosqlOption.defaultCreateAt}Str`] = moment(ctx.request.body[router.xnosqlOption.defaultCreateAt]).utcOffset(router.xnosqlOption.defaultUTC || 8).format('YYYY-MM-DD HH:mm:ss')
+    }
+    if (router.xnosqlOption.defaultUpdateAt) {
+        ctx.request.body[router.xnosqlOption.defaultUpdateAt] = Date.now()
+        ctx.request.body[`${router.xnosqlOption.defaultUpdateAt}Str`] = moment(ctx.request.body[router.xnosqlOption.defaultUpdateAt]).utcOffset(router.xnosqlOption.defaultUTC || 8).format('YYYY-MM-DD HH:mm:ss')
+    }
+    if (router.xnosqlOption.defaultBlockBy) {
+        ctx.request.body[router.xnosqlOption.defaultBlockBy] = router.xnosqlOption.defaultBlockByValue || "N"
     }
     let result
     try {

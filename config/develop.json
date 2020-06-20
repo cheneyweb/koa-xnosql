@@ -6,13 +6,20 @@
         "port": 3636,
         "xnosqlRoot": "/xnosql",
         "mongodbUrl": "mongodb://localhost:27017/test",
+        "mongoOption": {
+            "useUnifiedTopology": true,
+            "useNewUrlParser": true
+        },
         "mongodbName": "test",
+        "defaultId": "_id",
         "defaultCreateAt": "createAt",
+        "defaultUpdateAt": "updateAt",
+        "defaultBlockBy": "blockBy",
+        "defaultBlockByValue": "N",
         "defaultUTC": 8,
-        "defaultSortBy": "id",
+        "defaultSortBy": "createAt",
         "defaultSortOrder": -1,
         "defaultLimit": 200,
-        "defaultId": true,
         "defaultLog": true
     }
 }
