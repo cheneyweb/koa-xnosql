@@ -165,6 +165,11 @@ router.get('/:model_name/feed', async (ctx, next) => {
             log.info(`\n[QUERY] ${JSON.stringify(ctx.request.query)}\n[OPTION] ${JSON.stringify(findOption)}\n[SORT] ${JSON.stringify(sort)}\n[LIMIT-SKIP] ${limit}-${skip}`)
         }
         let result = await router.mongodb.collection(ctx.params.model_name).find(ctx.request.query, findOption).sort(sort).limit(limit).skip(skip).toArray()
+        if (router.xnosqlOption.defaultId == '_id') {
+            for (let item of result) {
+                item.id = item._id
+            }
+        }
         ctx.body = okRes(result)
         ctx.body.skip = result.length > 0 ? skip + result.length : null
         return next()
@@ -218,6 +223,9 @@ router.get('/:model_name/get/:id', async (ctx, next) => {
         let findOption = ctx.request.query.findOption
         delete ctx.request.query.findOption
         let result = await router.mongodb.collection(ctx.params.model_name).findOne(query, findOption)
+        if (router.xnosqlOption.defaultId == '_id' && result) {
+            result.id = result._id
+        }
         ctx.body = okRes(result)
         return next()
     } catch (error) {
