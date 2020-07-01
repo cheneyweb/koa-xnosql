@@ -60,7 +60,7 @@ router.init = function (app, options) {
 }
 // 创建实体对象
 router.post('/:model_name/create', async (ctx, next) => {
-    if (router.xnosqlOption.defaultId) {
+    if (router.xnosqlOption.defaultId && !ctx.request.body[router.xnosqlOption.defaultId]) {
         ctx.request.body[router.xnosqlOption.defaultId] = _generateUUID()
     }
     if (router.xnosqlOption.defaultCreateAt) {
