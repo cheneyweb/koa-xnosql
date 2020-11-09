@@ -1,6 +1,6 @@
 {
   "name": "koa-xnosql",
-  "version": "3.0.8",
+  "version": "3.1.0",
   "description": "NoSql服务应用中间件，快速构建轻量小巧灵活的NoSql服务",
   "main": "index.js",
   "scripts": {
@@ -14,9 +14,9 @@
   "dependencies": {
     "koa-mount": "^4.0.0",
     "koa-router": "^8.0.8",
-    "moment": "^2.27.0",
-    "mongodb": "^3.5.9",
-    "tracer": "^1.1.2"
+    "moment": "^2.29.1",
+    "mongodb": "^3.6.3",
+    "tracer": "^1.1.4"
   },
   "author": "cheneyxu",
   "license": "ISC"

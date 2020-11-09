@@ -71,8 +71,8 @@ router.post('/:model_name/create', async (ctx, next) => {
         ctx.request.body[router.xnosqlOption.defaultUpdateAt] = Date.now()
         ctx.request.body[`${router.xnosqlOption.defaultUpdateAt}Str`] = moment(ctx.request.body[router.xnosqlOption.defaultUpdateAt]).utcOffset(router.xnosqlOption.defaultUTC || 8).format('YYYY-MM-DD HH:mm:ss')
     }
-    if (router.xnosqlOption.defaultBlockBy) {
-        ctx.request.body[router.xnosqlOption.defaultBlockBy] = router.xnosqlOption.defaultBlockByValue || "N"
+    if (router.xnosqlOption.defaultBlockBy && !ctx.request.body[router.xnosqlOption.defaultBlockBy]) {
+        ctx.request.body[router.xnosqlOption.defaultBlockBy] = router.xnosqlOption.defaultBlockByValue || 'N'
     }
     let result
     try {
@@ -162,7 +162,7 @@ router.get('/:model_name/feed', async (ctx, next) => {
         delete ctx.request.query.sortOrder
         // 输出查询日志
         if (router.xnosqlOption.defaultLog) {
-            log.info(`\n[QUERY] ${JSON.stringify(ctx.request.query)}\n[OPTION] ${JSON.stringify(findOption)}\n[SORT] ${JSON.stringify(sort)}\n[LIMIT-SKIP] ${limit}-${skip}`)
+            log.debug(`\n[QUERY] ${JSON.stringify(ctx.request.query)}\n[OPTION] ${JSON.stringify(findOption)}\n[SORT] ${JSON.stringify(sort)}\n[LIMIT-SKIP] ${limit}-${skip}`)
         }
         let result = await router.mongodb.collection(ctx.params.model_name).find(ctx.request.query, findOption).sort(sort).limit(limit).skip(skip).toArray()
         if (router.xnosqlOption.defaultId == '_id') {
