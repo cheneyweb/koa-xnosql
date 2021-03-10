@@ -5,7 +5,7 @@ declare global {
         interface Global {
             mongo: MongoClient
             mongodb: Db
-            async getMongoSession() : Promise<ClientSession>
+            getMongoSession() : Promise<ClientSession>
         }
     }
 }
