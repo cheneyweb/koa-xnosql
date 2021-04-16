@@ -14,11 +14,13 @@ const log = require('tracer').colorConsole()
 
 function mongoConnect(options) {
     options.mongoOption = options.mongoOption || {}
+    log.info('正在连接数据库...')
     MongoClient.connect(options.mongodbUrl, { useNewUrlParser: true, ...options.mongoOption }, (err, database) => {
         if (err) {
-            log.warn('mongo reconnecting...')
+            log.warn('数据库连接失败', err.message)
             setTimeout(() => mongoConnect(options), 1000)
         } else {
+            log.info('数据库连接成功')
             global.mongo = database
             global.mongodb = router.mongodb = options.mongodbName ? database.db(options.mongodbName) : database.db(options.mongodbUrl.substring(options.mongodbUrl.lastIndexOf('/') + 1, options.mongodbUrl.length))
             global.getMongoSession = async () => {
@@ -160,6 +162,7 @@ router.get('/:model_name/feed', async (ctx, next) => {
         delete ctx.request.query.sort
         delete ctx.request.query.sortBy
         delete ctx.request.query.sortOrder
+        delete ctx.request.query.findOption
         // 输出查询日志
         if (router.xnosqlOption.defaultLog) {
             log.debug(`\n[QUERY] ${JSON.stringify(ctx.request.query)}\n[OPTION] ${JSON.stringify(findOption)}\n[SORT] ${JSON.stringify(sort)}\n[LIMIT-SKIP] ${limit}-${skip}`)
