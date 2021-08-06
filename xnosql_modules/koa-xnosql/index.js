@@ -10,7 +10,7 @@ const MongoClient = require('mongodb').MongoClient
 const ObjectId = require('mongodb').ObjectID
 // 日志相关
 const moment = require('moment')
-const log = require('tracer').colorConsole()
+const log = require('tracer').console()
 
 function mongoConnect(options) {
     options.mongoOption = options.mongoOption || {}
